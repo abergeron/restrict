@@ -8,6 +8,12 @@ use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::process::exit;
+use systemd_journal_logger::JournalLog;
+
+fn setup_logging() {
+    JournalLog::new().unwrap().install().unwrap();
+    log::set_max_level(log::LevelFilter::Info);
+}
 
 fn lines(path: OsString) -> Result<Vec<String>> {
     let file = File::open(path)?;
@@ -27,6 +33,7 @@ fn fail() -> ! {
 }
 
 fn main() {
+    setup_logging();
     let rules_file = match env::args_os().nth(1) {
         Some(path) => path,
         None => {
@@ -65,7 +72,7 @@ fn main() {
                 }
             }
             Err(e) => {
-                log::info!("Invalid regex in rules file: {rule}: {e}");
+                log::error!("Invalid regex in rules file: {rule}: {e}");
                 fail();
             }
         }
