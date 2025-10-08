@@ -63,12 +63,14 @@ fn main() {
         }
         match Regex::new(&rule) {
             Ok(r) => {
-                if r.is_match(&original_command) {
-                    log::info!("Matched rule {rule}, running command");
-                    let err = run_command(&original_command);
-                    log::error!("Error running command: {err}");
-                    println!("error");
-                    exit(1);
+                if let Some(m) = r.find(&original_command) {
+                    if m.start() == 0 && m.end() == original_command.len() {
+                        log::info!("Matched rule {rule}, running command");
+                        let err = run_command(&original_command);
+                        log::error!("Error running command: {err}");
+                        println!("error");
+                        exit(1);
+                    }
                 }
             }
             Err(e) => {
